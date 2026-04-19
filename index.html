@@ -342,8 +342,24 @@
     overflow: hidden;
     position: relative;
     cursor: pointer;
-    background: #f0f0f0;
+    background: #ebebeb;
     flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+
+  .video-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+    animation: skeleton-shimmer 1.4s infinite;
+    transition: opacity 0.3s ease;
+  }
+
+  .video-tile.loaded::before {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .video-tile video {
@@ -351,6 +367,12 @@
     height: 100%;
     object-fit: cover;
     display: block;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .video-tile.loaded video {
+    opacity: 1;
   }
 
   .video-tile .play-icon {
@@ -361,6 +383,7 @@
     justify-content: center;
     pointer-events: none;
     transition: opacity 0.15s;
+    z-index: 2;
   }
 
   .video-tile .play-icon svg {
@@ -769,6 +792,16 @@
     video.addEventListener('ended', function() {
       video.closest('.video-tile').classList.remove('playing');
     });
+
+    // Remove skeleton once video metadata (and poster) is ready
+    function markLoaded() {
+      video.closest('.video-tile').classList.add('loaded');
+    }
+    if (video.readyState >= 1) {
+      markLoaded();
+    } else {
+      video.addEventListener('loadedmetadata', markLoaded, { once: true });
+    }
   });
 </script>
 </body>
